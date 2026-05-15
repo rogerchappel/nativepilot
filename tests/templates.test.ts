@@ -4,7 +4,7 @@ import { moduleNameFor, normalizeAppName, packageNameFor, parseProviders } from 
 
 test('normalizes app names for directories modules and packages', () => {
   assert.equal(normalizeAppName(' My AI App! '), 'My-AI-App');
-  assert.equal(moduleNameFor('my-ai_app'), 'MyAIApp');
+  assert.equal(moduleNameFor('my-ai_app'), 'MyAiApp');
   assert.equal(packageNameFor('My_AI App'), 'my-ai-app');
 });
 
