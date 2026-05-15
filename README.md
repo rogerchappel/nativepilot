@@ -24,6 +24,9 @@ npm run start
 
 ## Commands
 
+See [docs/COMMANDS.md](docs/COMMANDS.md) for full command details.
+
+
 - `nativepilot create <app-name>` — scaffold an Expo-first React Native app.
 - `nativepilot doctor [root]` — check structure, aliases, guidance freshness, and unsafe key patterns.
 - `nativepilot clean-demo [root]` — remove showcase screens while preserving AI, theme, navigation, and guidance wiring.
