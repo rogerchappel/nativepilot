@@ -1,58 +1,22 @@
 # Security Policy
 
-## Supported Versions
+## Supported versions
 
-Replace this section with the supported versions for `nativepilot`.
+NativePilot is pre-1.0. Security fixes target the current `main` branch.
 
-Example:
+## Reporting a vulnerability
 
-```md
-| Version | Supported |
-| --- | --- |
-| .x | Yes |
-| < .0 | No |
-```
-
-If the project does not publish versioned releases yet, say that clearly.
-
-## Reporting a Vulnerability
-
-Please do not report suspected vulnerabilities in public issues, pull requests, or discussions.
-
-Ask maintainers for the private security reporting path before sharing details.
-
-If no private reporting path exists yet, ask maintainers through public project channels for a private reporting path. Do not include exploit details, secrets, personal data, or sensitive technical details in public messages.
-
-## What to Include
-
-When a private reporting path is available, include:
-
-- A clear description of the issue.
-- Affected versions, files, packages, workflows, or configuration.
-- Steps to reproduce, proof of concept, or attack scenario when safe to share.
-- Potential impact.
-- Suggested mitigation, if known.
-
-## Response Expectations
-
-Maintainers review good-faith reports as capacity allows.
-
-Do not imply paid support, guaranteed response times, guaranteed fixes, or service-level agreements unless `nativepilot` explicitly provides them.
+Please open a private GitHub security advisory or contact the maintainer directly. Do not publish exploit details before a fix is available.
 
 ## Scope
 
-In scope:
+NativePilot generates local files and runs local checks. The generator should not make hidden network calls, collect telemetry, or install packages in generated apps.
 
-- Vulnerabilities in nativepilot.
-- Insecure default configuration shipped by this project.
-- CI, release, or dependency guidance maintained by this project.
+Generated apps may include development-only `.env.example` placeholders. Real provider keys must not be committed and must not be shipped in a production mobile bundle. Use a server or trusted proxy for production LLM traffic.
 
-Out of scope:
+## Useful local checks
 
-- General support requests.
-- Requests for guaranteed maintenance timelines.
-- Issues in unrelated downstream projects.
-
-## Disclosure
-
-Coordinate disclosure with maintainers before publishing vulnerability details.
+```bash
+nativepilot doctor . --fail-on unsafe-key,stale-guidance
+npm test
+```
