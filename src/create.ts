@@ -7,8 +7,9 @@ export type RawCreateOptions = { dir?: string; preset?: string; providers?: stri
 
 export async function createProject(appName: string, raw: RawCreateOptions = {}): Promise<{ root: string; files: string[] }> {
   if (raw.preset && raw.preset !== 'expo') throw new Error('V1 only supports --preset expo.');
-  const name = normalizeAppName(appName);
-  const root = raw.dir ? path.resolve(raw.dir) : projectDirFrom(process.cwd(), name);
+  const looksLikePath = path.isAbsolute(appName) || appName.includes(path.sep) || appName.includes('/');
+  const root = raw.dir ? path.resolve(raw.dir) : looksLikePath ? path.resolve(appName) : projectDirFrom(process.cwd(), normalizeAppName(appName));
+  const name = normalizeAppName(looksLikePath ? path.basename(root) : appName);
   const options: CreateOptions = { dir: root, name, preset: 'expo', providers: parseProviders(raw.providers), force: Boolean(raw.force) };
   await assertWritableNewProject(root, options.force);
   const files = createFiles(options);
