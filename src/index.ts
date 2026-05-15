@@ -4,9 +4,10 @@ import { cleanDemo } from './clean-demo.js';
 import { createProject } from './create.js';
 import { doctor } from './doctor.js';
 import { printAgentBrief } from './brief.js';
+import { nativepilotVersion } from './version.js';
 
 const program = new Command();
-program.name('nativepilot').description('AI-native Expo React Native starter generator.').version('0.1.0');
+program.name('nativepilot').description('AI-native Expo React Native starter generator.').version(nativepilotVersion);
 
 program.command('create')
   .argument('<app-name>')
