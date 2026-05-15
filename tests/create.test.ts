@@ -45,6 +45,8 @@ test('clean-demo removes showcase while preserving AI wiring', async () => {
   await createProject('CleanApp', { dir: temp });
   const result = await cleanDemo(temp);
   assert.deepEqual(result.removed, ['app/chat.tsx', 'src/demo']);
+  const audit = await readFile(path.join(temp, 'docs/DEMO_REMOVED.md'), 'utf8');
+  assert.match(audit, /showcase chat screen was removed/);
   const client = await readFile(path.join(temp, 'src/ai/client.ts'), 'utf8');
   assert.match(client, /AIProviderConfig/);
 });
