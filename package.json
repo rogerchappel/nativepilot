@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "description": "AI-native Expo React Native starter generator with local-first safety checks.",
   "type": "module",
-  "bin": { "nativepilot": "./dist/index.js" },
-  "main": "./dist/index.js",
-  "exports": { ".": "./dist/index.js" },
+  "bin": { "nativepilot": "./dist/src/index.js" },
+  "main": "./dist/src/index.js",
+  "exports": { ".": "./dist/src/index.js" },
   "files": ["dist", "README.md", "LICENSE", "SECURITY.md", "CONTRIBUTING.md"],
   "scripts": {
     "build": "tsc",
