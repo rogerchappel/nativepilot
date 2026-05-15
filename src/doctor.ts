@@ -20,6 +20,7 @@ export async function doctor(rootInput: string, failOn: string[] = []): Promise<
   }
   await scanUnsafeKeys(root, issues);
   await checkAliasConsistency(root, issues);
+  await checkPackageScripts(root, issues);
   const elevated = issues.map((issue) => failOn.includes(issue.code) || failOn.includes(issue.severity) ? { ...issue, severity: 'error' as const } : issue);
   return { ok: elevated.every((issue) => issue.severity !== 'error'), root, issueCount: elevated.length, issues: elevated };
 }
@@ -29,6 +30,15 @@ async function checkAliasConsistency(root: string, issues: DoctorIssue[]): Promi
   if (tsconfig && !tsconfig.includes('"@/*"')) issues.push(warn('alias-mismatch', 'tsconfig.json is missing the @/* path alias.', 'tsconfig.json'));
   const chat = await readTextIfExists(path.join(root, 'app/chat.tsx'));
   if (chat && !chat.includes("@/ai/useAIChat")) issues.push(warn('alias-mismatch', 'Chat screen is not using the canonical AI hook alias.', 'app/chat.tsx'));
+}
+
+async function checkPackageScripts(root: string, issues: DoctorIssue[]): Promise<void> {
+  const text = await readTextIfExists(path.join(root, 'package.json'));
+  if (!text) return;
+  const pkg = JSON.parse(text) as { scripts?: Record<string, string> };
+  for (const script of ['test', 'nativepilot:doctor', 'nativepilot:brief']) {
+    if (!pkg.scripts?.[script]) issues.push(warn('missing-script', `package.json is missing script: ${script}`, 'package.json'));
+  }
 }
 
 async function scanUnsafeKeys(root: string, issues: DoctorIssue[], prefix = ''): Promise<void> {
