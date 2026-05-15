@@ -25,6 +25,7 @@ test('doctor passes a fresh generated app', async () => {
   await createProject('DoctorApp', { dir: temp });
   const result = await doctor(temp, ['unsafe-key', 'stale-guidance']);
   assert.equal(result.ok, true, JSON.stringify(result.issues));
+  assert.equal(result.issues.some((issue) => issue.code === 'missing-script'), false);
 });
 
 test('doctor catches unsafe provider keys', async () => {
