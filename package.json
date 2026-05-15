@@ -3,10 +3,20 @@
   "version": "0.1.0",
   "description": "AI-native Expo React Native starter generator with local-first safety checks.",
   "type": "module",
-  "bin": { "nativepilot": "./dist/src/index.js" },
+  "bin": {
+    "nativepilot": "./dist/src/index.js"
+  },
   "main": "./dist/src/index.js",
-  "exports": { ".": "./dist/src/index.js" },
-  "files": ["dist", "README.md", "LICENSE", "SECURITY.md", "CONTRIBUTING.md"],
+  "exports": {
+    ".": "./dist/src/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "SECURITY.md",
+    "CONTRIBUTING.md"
+  ],
   "scripts": {
     "build": "tsc",
     "check": "tsc --noEmit",
@@ -15,10 +25,33 @@
     "package:smoke": "npm pack --dry-run",
     "release:check": "npm run check && npm test && npm run smoke && npm run package:smoke"
   },
-  "keywords": ["expo", "react-native", "ai", "llm", "starter", "cli", "agents"],
+  "keywords": [
+    "expo",
+    "react-native",
+    "ai",
+    "llm",
+    "starter",
+    "cli",
+    "agents"
+  ],
   "author": "Roger Chappel",
   "license": "MIT",
-  "engines": { "node": ">=20" },
-  "dependencies": { "commander": "^12.1.0" },
-  "devDependencies": { "@types/node": "^22.10.2", "typescript": "^5.7.2" }
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "commander": "^12.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rogerchappel/nativepilot.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rogerchappel/nativepilot/issues"
+  },
+  "homepage": "https://github.com/rogerchappel/nativepilot#readme"
 }
