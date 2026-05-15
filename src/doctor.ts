@@ -1,0 +1,50 @@
+import path from 'node:path';
+import { readdir } from 'node:fs/promises';
+import { pathExists, readTextIfExists } from './fsx.js';
+import type { DoctorIssue, DoctorResult } from './types.js';
+
+const requiredFiles = ['package.json', 'app/_layout.tsx', 'app/chat.tsx', 'src/ai/types.ts', 'src/ai/client.ts', 'src/ai/useAIChat.ts', 'src/theme/tokens.ts', 'nativepilot.config.ts', 'AGENTS.md', 'docs/ARCHITECTURE.md', 'docs/SECURITY_MODEL.md'];
+const guidanceFiles = ['AGENTS.md', 'CLAUDE.md', '.cursor/rules/nativepilot.mdc', '.github/copilot-instructions.md'];
+const unsafeKeyPatterns = [/sk-[A-Za-z0-9_-]{20,}/g, /AIza[A-Za-z0-9_-]{20,}/g, /anthropic_[A-Za-z0-9_-]{20,}/g];
+
+export async function doctor(rootInput: string, failOn: string[] = []): Promise<DoctorResult> {
+  const root = path.resolve(rootInput);
+  const issues: DoctorIssue[] = [];
+  for (const file of requiredFiles) {
+    if (!(await pathExists(path.join(root, file)))) issues.push(error('missing-file', `Missing required nativepilot file: ${file}`, file));
+  }
+  for (const file of guidanceFiles) {
+    const text = await readTextIfExists(path.join(root, file));
+    if (!text) issues.push(warn('missing-guidance', `Missing agent guidance file: ${file}`, file));
+    else if (!/nativepilot|NativePilot/.test(text)) issues.push(warn('stale-guidance', `Guidance file does not mention nativepilot: ${file}`, file));
+  }
+  await scanUnsafeKeys(root, issues);
+  await checkAliasConsistency(root, issues);
+  const elevated = issues.map((issue) => failOn.includes(issue.code) || failOn.includes(issue.severity) ? { ...issue, severity: 'error' as const } : issue);
+  return { ok: elevated.every((issue) => issue.severity !== 'error'), root, issueCount: elevated.length, issues: elevated };
+}
+
+async function checkAliasConsistency(root: string, issues: DoctorIssue[]): Promise<void> {
+  const tsconfig = await readTextIfExists(path.join(root, 'tsconfig.json'));
+  if (tsconfig && !tsconfig.includes('"@/*"')) issues.push(warn('alias-mismatch', 'tsconfig.json is missing the @/* path alias.', 'tsconfig.json'));
+  const chat = await readTextIfExists(path.join(root, 'app/chat.tsx'));
+  if (chat && !chat.includes("@/ai/useAIChat")) issues.push(warn('alias-mismatch', 'Chat screen is not using the canonical AI hook alias.', 'app/chat.tsx'));
+}
+
+async function scanUnsafeKeys(root: string, issues: DoctorIssue[], prefix = ''): Promise<void> {
+  let entries;
+  try { entries = await readdir(path.join(root, prefix), { withFileTypes: true }); } catch { return; }
+  for (const entry of entries) {
+    if (['node_modules', '.git', '.expo', 'dist'].includes(entry.name)) continue;
+    const relative = path.join(prefix, entry.name);
+    const absolute = path.join(root, relative);
+    if (entry.isDirectory()) await scanUnsafeKeys(root, issues, relative);
+    if (entry.isFile() && /\.(ts|tsx|js|jsx|json|md|env|example)$/.test(entry.name)) {
+      const text = await readTextIfExists(absolute) ?? '';
+      if (unsafeKeyPatterns.some((pattern) => pattern.test(text))) issues.push(error('unsafe-key', `Potential provider secret found in ${relative}.`, relative));
+    }
+  }
+}
+
+function warn(code: string, message: string, file?: string): DoctorIssue { return { code, severity: 'warn', message, file }; }
+function error(code: string, message: string, file?: string): DoctorIssue { return { code, severity: 'error', message, file }; }
