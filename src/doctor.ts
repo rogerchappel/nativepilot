@@ -3,7 +3,7 @@ import { readdir } from 'node:fs/promises';
 import { pathExists, readTextIfExists } from './fsx.js';
 import type { DoctorIssue, DoctorResult } from './types.js';
 
-const requiredFiles = ['package.json', 'app/_layout.tsx', 'app/chat.tsx', 'src/ai/types.ts', 'src/ai/client.ts', 'src/ai/useAIChat.ts', 'src/theme/tokens.ts', 'nativepilot.config.ts', 'nativepilot.manifest.json', 'AGENTS.md', 'docs/ARCHITECTURE.md', 'docs/SECURITY_MODEL.md'];
+const requiredFiles = ['package.json', 'app/_layout.tsx', 'app/chat.tsx', 'src/ai/types.ts', 'src/ai/client.ts', 'src/ai/useAIChat.ts', 'src/theme/tokens.ts', 'nativepilot.config.ts', 'nativepilot.manifest.json', 'AGENTS.md', 'docs/ARCHITECTURE.md', 'docs/SECURITY_MODEL.md', 'docs/PROVIDER_BOUNDARY.md'];
 const guidanceFiles = ['AGENTS.md', 'CLAUDE.md', '.cursor/rules/nativepilot.mdc', '.github/copilot-instructions.md'];
 const unsafeKeyPatterns = [/sk-[A-Za-z0-9_-]{20,}/g, /AIza[A-Za-z0-9_-]{20,}/g, /anthropic_[A-Za-z0-9_-]{20,}/g];
 
