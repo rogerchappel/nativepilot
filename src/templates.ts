@@ -86,6 +86,7 @@ export function createFiles(options: CreateOptions): GeneratedFile[] {
     file('.github/copilot-instructions.md', copilotInstructions(displayName)),
     file('docs/ARCHITECTURE.md', architectureDoc(displayName)),
     file('docs/SECURITY_MODEL.md', securityDoc(providerList)),
+    file('docs/PROVIDER_BOUNDARY.md', providerBoundaryDoc()),
     file('docs/AGENT_BRIEF.md', agentBrief(displayName)),
     file('scripts/nativepilot-smoke.mjs', smokeScript(), true),
     file('nativepilot.manifest.json', manifestFile(displayName, providers)),
@@ -122,6 +123,7 @@ function claudeMd(name: string): string { return `# Claude guidance for ${name}\
 function cursorRules(name: string): string { return `---\ndescription: NativePilot rules for ${name}\nglobs: ["app/**/*.tsx", "src/**/*.ts", "src/**/*.tsx"]\nalwaysApply: true\n---\nKeep AI provider code isolated under src/ai and never inline secrets in screens.\n`; }
 function copilotInstructions(name: string): string { return `# Copilot instructions\n\nThis is ${name}, a nativepilot Expo app. Suggest code that keeps AI configuration provider-agnostic and mobile secrets development-only.\n`; }
 function architectureDoc(name: string): string { return `# Architecture\n\n${name} uses Expo Router for screens, \`src/theme\` for tokens, \`src/i18n\` for copy, and \`src/ai\` for all provider-facing code. Screens call hooks; hooks call the provider-agnostic client; production provider traffic should go through a backend/proxy.\n`; }
+function providerBoundaryDoc(): string { return `# Provider boundary\n\nUse direct mobile provider configuration for local prototypes only. For production, point `EXPO_PUBLIC_AI_PROXY_URL` at your authenticated API and keep vendor keys server-side. The generated `src/ai/client.ts` is intentionally proxy-shaped so provider swaps do not leak into screens.\n`; }
 function securityDoc(providerList: string): string { return `# Security model\n\nSupported provider adapters:\n\n${providerList}\n\nMobile bundles are public. Direct API keys in \`EXPO_PUBLIC_*\` are development-only. Production deployments should use auth, rate limiting, logging, and key storage on a server/proxy boundary.\n`; }
 function agentBrief(name: string): string { return `# Agent brief\n\nGoal: extend ${name} without guessing the architecture.\n\n1. Read AGENTS.md.\n2. Keep AI code under src/ai.\n3. Keep demo deletion safe via \`nativepilot clean-demo\`.\n4. Verify with \`npm test\` and \`nativepilot doctor .\`.\n`; }
 function manifestFile(name: string, providers: Provider[]): string { return JSON.stringify({ generator: 'nativepilot', guidanceVersion: '1', preset: 'expo', name, providers, managedPaths: ['app', 'src/ai', 'src/theme', 'src/navigation', 'AGENTS.md', 'docs/SECURITY_MODEL.md'] }, null, 2) + '\n'; }
