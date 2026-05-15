@@ -7,7 +7,7 @@ mkdir -p "$TMP"
 node "$ROOT/dist/src/index.js" create SmokeApp --dir "$APP" --providers openai,anthropic,gemini,local > "$TMP/create.json"
 node "$ROOT/dist/src/index.js" doctor "$APP" --fail-on unsafe-key,stale-guidance > "$TMP/doctor.json"
 node "$ROOT/dist/src/index.js" print-agent-brief "$APP" --for codex > "$TMP/brief.md"
-node "$APP/scripts/nativepilot-smoke.mjs"
+(cd "$APP" && node "scripts/nativepilot-smoke.mjs")
 node "$ROOT/dist/src/index.js" clean-demo "$APP" > "$TMP/clean.json"
 test ! -e "$APP/app/chat.tsx"
 test -e "$APP/src/ai/client.ts"
