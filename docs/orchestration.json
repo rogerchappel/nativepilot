@@ -1,0 +1,16 @@
+{
+  "project": "nativepilot",
+  "mode": "local-first-cli",
+  "commands": ["create", "doctor", "clean-demo", "print-agent-brief"],
+  "slices": [
+    { "name": "generator", "owner": "cli", "gate": "node --test dist/tests/create.test.js" },
+    { "name": "doctor", "owner": "cli", "gate": "nativepilot doctor generated-app --fail-on unsafe-key,stale-guidance" },
+    { "name": "cleanup", "owner": "cli", "gate": "nativepilot clean-demo generated-app" },
+    { "name": "guidance", "owner": "docs", "gate": "nativepilot print-agent-brief generated-app" }
+  ],
+  "safety": {
+    "network": "no hidden network calls from the generator or tests",
+    "secrets": "doctor flags common provider-key patterns; production keys require server/proxy boundary",
+    "destructiveActions": "create refuses non-empty dirs unless --force; clean-demo removes only known showcase paths"
+  }
+}
