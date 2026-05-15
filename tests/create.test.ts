@@ -23,6 +23,16 @@ test('create scaffolds an Expo-first nativepilot app', async () => {
   assert.match(readme, /OpenAI-compatible/);
 });
 
+
+test('create accepts an explicit filesystem path as target', async () => {
+  const base = await mkdtemp(path.join(tmpdir(), 'nativepilot-path-'));
+  const target = path.join(base, 'PathSmoke');
+  const result = await createProject(target, { providers: 'local' });
+  assert.equal(result.root, target);
+  const pkg = JSON.parse(await readFile(path.join(target, 'package.json'), 'utf8'));
+  assert.equal(pkg.name, 'pathsmoke');
+});
+
 test('doctor passes a fresh generated app', async () => {
   const temp = await mkdtemp(path.join(os.tmpdir(), 'nativepilot-doctor-'));
   await createProject('DoctorApp', { dir: temp });
