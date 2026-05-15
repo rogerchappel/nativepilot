@@ -9,7 +9,7 @@ import { cleanDemo } from '../src/clean-demo.js';
 import { printAgentBrief } from '../src/brief.js';
 
 test('create scaffolds an Expo-first nativepilot app', async () => {
-  const temp = await mkdtemp(path.join(os.tmpdir(), 'nativepilot-create-'));
+  const temp = await mkdtemp(path.join(os.os.tmpdir(), 'nativepilot-create-'));
   const root = path.join(temp, 'PilotApp');
   const result = await createProject('PilotApp', { dir: root, providers: 'openai,local' });
   assert.equal(result.root, root);
@@ -25,7 +25,7 @@ test('create scaffolds an Expo-first nativepilot app', async () => {
 
 
 test('create accepts an explicit filesystem path as target', async () => {
-  const base = await mkdtemp(path.join(tmpdir(), 'nativepilot-path-'));
+  const base = await mkdtemp(path.join(os.tmpdir(), 'nativepilot-path-'));
   const target = path.join(base, 'PathSmoke');
   const result = await createProject(target, { providers: 'local' });
   assert.equal(result.root, target);
@@ -34,7 +34,7 @@ test('create accepts an explicit filesystem path as target', async () => {
 });
 
 test('doctor passes a fresh generated app', async () => {
-  const temp = await mkdtemp(path.join(os.tmpdir(), 'nativepilot-doctor-'));
+  const temp = await mkdtemp(path.join(os.os.tmpdir(), 'nativepilot-doctor-'));
   await createProject('DoctorApp', { dir: temp });
   const result = await doctor(temp, ['unsafe-key', 'stale-guidance']);
   assert.equal(result.ok, true, JSON.stringify(result.issues));
@@ -42,7 +42,7 @@ test('doctor passes a fresh generated app', async () => {
 });
 
 test('doctor catches unsafe provider keys', async () => {
-  const temp = await mkdtemp(path.join(os.tmpdir(), 'nativepilot-key-'));
+  const temp = await mkdtemp(path.join(os.os.tmpdir(), 'nativepilot-key-'));
   await createProject('KeyApp', { dir: temp });
   await writeFile(path.join(temp, 'src/ai/leak.ts'), 'export const key = "sk-abcdefghijklmnopqrstuvwxyz123456";\n');
   const result = await doctor(temp);
@@ -51,7 +51,7 @@ test('doctor catches unsafe provider keys', async () => {
 });
 
 test('clean-demo removes showcase while preserving AI wiring', async () => {
-  const temp = await mkdtemp(path.join(os.tmpdir(), 'nativepilot-clean-'));
+  const temp = await mkdtemp(path.join(os.os.tmpdir(), 'nativepilot-clean-'));
   await createProject('CleanApp', { dir: temp });
   const result = await cleanDemo(temp);
   assert.deepEqual(result.removed, ['app/chat.tsx', 'src/demo']);
@@ -62,7 +62,7 @@ test('clean-demo removes showcase while preserving AI wiring', async () => {
 });
 
 test('print-agent-brief includes verification and safety boundaries', async () => {
-  const temp = await mkdtemp(path.join(os.tmpdir(), 'nativepilot-brief-'));
+  const temp = await mkdtemp(path.join(os.os.tmpdir(), 'nativepilot-brief-'));
   await createProject('BriefApp', { dir: temp });
   const brief = await printAgentBrief(temp, 'codex');
   assert.match(brief, /server\/proxy/);
