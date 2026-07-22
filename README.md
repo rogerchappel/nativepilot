@@ -32,6 +32,19 @@ See [docs/COMMANDS.md](docs/COMMANDS.md) for full command details.
 - `nativepilot clean-demo [root]` — remove showcase screens while preserving AI, theme, navigation, and guidance wiring.
 - `nativepilot print-agent-brief [root] --for codex` — print a concise handoff for coding agents.
 
+## Runnable generator demo
+
+Exercise generation, safety validation, and the coding-agent handoff against a
+temporary app:
+
+```bash
+bash demo/run-generator-tour.sh
+```
+
+The demo installs nothing inside the generated app and removes its temporary
+files on exit. See [the generator demo walkthrough](docs/GENERATOR_DEMO.md) for
+the exact claims it verifies and what remains outside its scope.
+
 ## Generated app personality
 
 NativePilot apps are small, dark, explicit, and agent-readable. The generated demo includes:
