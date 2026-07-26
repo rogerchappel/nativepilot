@@ -9,8 +9,8 @@ It is not another static boilerplate. It is a launch lane for teams who want to 
 ```bash
 npm install
 npm run build
-node dist/index.js create MyAIAssistant
-node dist/index.js doctor ./MyAIAssistant --fail-on unsafe-key,stale-guidance
+node dist/src/index.js create MyAIAssistant
+node dist/src/index.js doctor ./MyAIAssistant --fail-on unsafe-key,stale-guidance
 ```
 
 When published, the intended usage is:
