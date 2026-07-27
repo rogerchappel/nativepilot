@@ -19,6 +19,8 @@ When published, the intended usage is:
 npx nativepilot create MyAIAssistant --preset expo --providers openai,anthropic,gemini,local
 cd MyAIAssistant
 npm install
+npm run typecheck
+npm run doctor
 npm run start
 ```
 
@@ -41,8 +43,9 @@ temporary app:
 bash demo/run-generator-tour.sh
 ```
 
-The demo installs nothing inside the generated app and removes its temporary
-files on exit. See [the generator demo walkthrough](docs/GENERATOR_DEMO.md) for
+The interactive demo installs nothing inside the generated app and removes its temporary
+files on exit. The release check separately installs a disposable generated app
+from a fresh lockfile, runs Expo Doctor, and typechecks it. See [the generator demo walkthrough](docs/GENERATOR_DEMO.md) for
 the exact claims it verifies and what remains outside its scope.
 
 ## Generated app personality
@@ -76,6 +79,7 @@ npm run check
 npm test
 npm run build
 npm run smoke
+npm run generated:smoke
 bash scripts/validate.sh
 ```
 
