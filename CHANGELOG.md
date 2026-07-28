@@ -11,6 +11,12 @@ format and uses semantic versioning when versioned releases are published.
 
 - Initial project setup.
 
+### Fixed
+
+- Keep generated Expo SDK 57 apps on its exact compatible Reanimated and
+  Worklets versions so a new npm lockfile can be installed cleanly with
+  `npm ci`.
+
 ## Release Links
 
 - Unreleased:
