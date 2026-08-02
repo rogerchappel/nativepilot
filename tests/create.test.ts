@@ -24,9 +24,9 @@ test('create scaffolds an Expo-first nativepilot app', async () => {
   const pkg = JSON.parse(await readFile(path.join(root, 'package.json'), 'utf8'));
   assert.equal(pkg.dependencies.expo, '~57.0.8');
   assert.equal(pkg.dependencies.react, '19.2.3');
-  assert.equal(pkg.dependencies['react-native'], '0.86.0');
-  assert.equal(pkg.dependencies['react-native-reanimated'], '4.5.0');
-  assert.equal(pkg.dependencies['react-native-worklets'], '0.10.0');
+  assert.equal(pkg.dependencies['react-native'], '0.86.2');
+  assert.equal(pkg.dependencies['react-native-reanimated'], '4.5.1');
+  assert.equal(pkg.dependencies['react-native-worklets'], '0.10.1');
   assert.equal(pkg.devDependencies.typescript, '~6.0.3');
   assert.equal(pkg.scripts.typecheck, 'tsc --noEmit');
   assert.equal(pkg.scripts.doctor, 'expo-doctor');
