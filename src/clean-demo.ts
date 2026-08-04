@@ -12,5 +12,12 @@ export async function cleanDemo(rootInput: string): Promise<{ root: string; remo
     await writeProjectFile(root, 'app/index.tsx', `import { Text, View } from 'react-native';\nimport { tokens } from '@/theme/tokens';\n\nexport default function Home() {\n  return <View style={{ flex: 1, gap: 16, padding: 24, backgroundColor: tokens.colors.background }}>\n    <Text style={{ color: tokens.colors.text, fontSize: 28, fontWeight: '700' }}>NativePilot app</Text>\n    <Text style={{ color: tokens.colors.muted }}>Demo screens were removed. AI, theme, navigation, and agent guidance boundaries are preserved.</Text>\n  </View>;\n}\n`);
   }
   await writeProjectFile(root, 'docs/DEMO_REMOVED.md', '# Demo removed\n\nThe showcase chat screen was removed with `nativepilot clean-demo`. Core AI hooks, provider configuration, theme tokens, navigation constants, and guidance files remain available.\n');
+  const manifestPath = path.join(root, 'nativepilot.manifest.json');
+  const manifestText = await readTextIfExists(manifestPath);
+  if (manifestText) {
+    const manifest = JSON.parse(manifestText) as Record<string, unknown>;
+    manifest.demoState = 'removed';
+    await writeProjectFile(root, 'nativepilot.manifest.json', `${JSON.stringify(manifest, null, 2)}\n`);
+  }
   return { root, removed: removed.sort(), preserved: ['src/ai', 'src/theme', 'src/navigation', 'AGENTS.md', 'docs/SECURITY_MODEL.md'] };
 }

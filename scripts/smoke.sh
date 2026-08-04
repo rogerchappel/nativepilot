@@ -11,4 +11,5 @@ node "$ROOT/dist/src/index.js" print-agent-brief "$APP" --for codex > "$TMP/brie
 node "$ROOT/dist/src/index.js" clean-demo "$APP" > "$TMP/clean.json"
 test ! -e "$APP/app/chat.tsx"
 test -e "$APP/src/ai/client.ts"
+node "$ROOT/dist/src/index.js" doctor "$APP" --fail-on unsafe-key,stale-guidance > "$TMP/doctor-cleaned.json"
 echo "nativepilot CLI smoke passed: $APP"

@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, writeFile } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { spawnSync } from 'node:child_process';
 import os from 'node:os';
 import path from 'node:path';
 import { createProject } from '../src/create.js';
@@ -68,6 +69,30 @@ test('clean-demo removes showcase while preserving AI wiring', async () => {
   assert.match(audit, /showcase chat screen was removed/);
   const client = await readFile(path.join(temp, 'src/ai/client.ts'), 'utf8');
   assert.match(client, /AIProviderConfig/);
+  const manifest = JSON.parse(await readFile(path.join(temp, 'nativepilot.manifest.json'), 'utf8'));
+  assert.equal(manifest.demoState, 'removed');
+});
+
+test('CLI doctor passes before and after the supported clean-demo lifecycle', async () => {
+  const temp = await mkdtemp(path.join(os.tmpdir(), 'nativepilot-lifecycle-'));
+  const root = path.join(temp, 'LifecycleApp');
+  const cli = path.resolve('dist/src/index.js');
+  const run = (...args: string[]) => spawnSync(process.execPath, [cli, ...args], { encoding: 'utf8' });
+  assert.equal(run('create', 'LifecycleApp', '--dir', root).status, 0);
+  const before = run('doctor', root);
+  assert.equal(before.status, 0, before.stderr || before.stdout);
+  assert.equal(run('clean-demo', root).status, 0);
+  const after = run('doctor', root);
+  assert.equal(after.status, 0, after.stderr || after.stdout);
+});
+
+test('doctor rejects an unmarked project with a missing chat screen', async () => {
+  const temp = await mkdtemp(path.join(os.tmpdir(), 'nativepilot-missing-chat-'));
+  await createProject('MissingChatApp', { dir: temp });
+  await rm(path.join(temp, 'app/chat.tsx'));
+  const result = await doctor(temp);
+  assert.equal(result.ok, false);
+  assert.ok(result.issues.some((issue) => issue.code === 'missing-file' && issue.file === 'app/chat.tsx'));
 });
 
 test('print-agent-brief includes verification and safety boundaries', async () => {
