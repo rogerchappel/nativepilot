@@ -86,6 +86,25 @@ test('CLI doctor passes before and after the supported clean-demo lifecycle', as
   assert.equal(after.status, 0, after.stderr || after.stdout);
 });
 
+test('CLI distinguishes omitted providers from empty provider input', async () => {
+  const temp = await mkdtemp(path.join(os.tmpdir(), 'nativepilot-provider-cli-'));
+  const cli = path.resolve('dist/src/index.js');
+  const run = (...args: string[]) => spawnSync(process.execPath, [cli, ...args], { encoding: 'utf8' });
+
+  const omittedRoot = path.join(temp, 'OmittedProviders');
+  const omitted = run('create', 'OmittedProviders', '--dir', omittedRoot);
+  assert.equal(omitted.status, 0, omitted.stderr || omitted.stdout);
+  assert.deepEqual(JSON.parse(await readFile(path.join(omittedRoot, 'nativepilot.manifest.json'), 'utf8')).providers,
+    ['openai', 'anthropic', 'gemini', 'local']);
+
+  for (const [label, value] of [['empty', ''], ['whitespace', '   '], ['commas', ',,,']] as const) {
+    const root = path.join(temp, label);
+    const result = run('create', label, '--dir', root, '--providers', value);
+    assert.equal(result.status, 1, result.stderr || result.stdout);
+    assert.match(result.stderr, /cannot be empty.*openai,anthropic,gemini,local/i);
+  }
+});
+
 test('doctor rejects an unmarked project with a missing chat screen', async () => {
   const temp = await mkdtemp(path.join(os.tmpdir(), 'nativepilot-missing-chat-'));
   await createProject('MissingChatApp', { dir: temp });
