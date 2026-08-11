@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
 import os from 'node:os';
 import path from 'node:path';
@@ -60,6 +60,37 @@ test('doctor catches unsafe provider keys', async () => {
   assert.ok(result.issues.some((issue) => issue.code === 'unsafe-key'));
 });
 
+test('doctor reports malformed and invalid manifest metadata as structured issues', async () => {
+  for (const [label, value] of [
+    ['malformed', '{broken'],
+    ['array', '[]'],
+    ['invalid-fields', JSON.stringify({ generator: 1, preset: null, demoState: [], managedPaths: 'app' })],
+  ] as const) {
+    const temp = await mkdtemp(path.join(os.tmpdir(), `nativepilot-manifest-${label}-`));
+    await createProject('ManifestApp', { dir: temp });
+    await writeFile(path.join(temp, 'nativepilot.manifest.json'), value);
+    const result = await doctor(temp);
+    assert.equal(result.ok, false);
+    assert.ok(result.issues.some((issue) => issue.code === 'invalid-manifest'
+      && issue.severity === 'error'
+      && issue.file === 'nativepilot.manifest.json'), JSON.stringify(result.issues));
+  }
+});
+
+test('doctor reports an unreadable manifest path as a file-specific issue', async () => {
+  const temp = await mkdtemp(path.join(os.tmpdir(), 'nativepilot-manifest-unreadable-'));
+  await createProject('UnreadableManifestApp', { dir: temp });
+  await rm(path.join(temp, 'nativepilot.manifest.json'));
+  await mkdir(path.join(temp, 'nativepilot.manifest.json'));
+
+  const result = await doctor(temp);
+
+  assert.equal(result.ok, false);
+  assert.ok(result.issues.some((issue) => issue.code === 'invalid-manifest'
+    && issue.file === 'nativepilot.manifest.json'
+    && /Unable to read/.test(issue.message)), JSON.stringify(result.issues));
+});
+
 test('clean-demo removes showcase while preserving AI wiring', async () => {
   const temp = await mkdtemp(path.join(os.tmpdir(), 'nativepilot-clean-'));
   await createProject('CleanApp', { dir: temp });
@@ -71,6 +102,36 @@ test('clean-demo removes showcase while preserving AI wiring', async () => {
   assert.match(client, /AIProviderConfig/);
   const manifest = JSON.parse(await readFile(path.join(temp, 'nativepilot.manifest.json'), 'utf8'));
   assert.equal(manifest.demoState, 'removed');
+});
+
+test('clean-demo rejects malformed metadata without partially mutating the project', async () => {
+  const temp = await mkdtemp(path.join(os.tmpdir(), 'nativepilot-clean-invalid-'));
+  await createProject('InvalidCleanApp', { dir: temp });
+  const tracked = ['app/chat.tsx', 'src/demo/demoContent.ts', 'app/index.tsx', 'nativepilot.manifest.json'];
+  await writeFile(path.join(temp, 'nativepilot.manifest.json'), '{broken');
+  const before = new Map(await Promise.all(tracked.map(async (file) => [file, await readFile(path.join(temp, file), 'utf8')] as const)));
+
+  await assert.rejects(cleanDemo(temp), /Malformed JSON.*nativepilot\.manifest\.json/);
+
+  for (const file of tracked) assert.equal(await readFile(path.join(temp, file), 'utf8'), before.get(file));
+  await assert.rejects(readFile(path.join(temp, 'docs/DEMO_REMOVED.md'), 'utf8'), { code: 'ENOENT' });
+});
+
+test('CLI clean-demo exits nonzero without mutation for invalid manifest shapes', async () => {
+  const temp = await mkdtemp(path.join(os.tmpdir(), 'nativepilot-clean-shape-'));
+  await createProject('ShapeCleanApp', { dir: temp });
+  await writeFile(path.join(temp, 'nativepilot.manifest.json'), '[]');
+  const chatBefore = await readFile(path.join(temp, 'app/chat.tsx'), 'utf8');
+  const cli = path.resolve('dist/src/index.js');
+
+  const result = spawnSync(process.execPath, [cli, 'clean-demo', temp], { encoding: 'utf8' });
+
+  assert.equal(result.status, 1, result.stderr || result.stdout);
+  assert.match(result.stderr, /must contain a JSON object/);
+  assert.equal(await readFile(path.join(temp, 'app/chat.tsx'), 'utf8'), chatBefore);
+  assert.equal(await readFile(path.join(temp, 'nativepilot.manifest.json'), 'utf8'), '[]');
+  assert.match(await readFile(path.join(temp, 'src/demo/demoContent.ts'), 'utf8'), /demoPrompts/);
+  await assert.rejects(readFile(path.join(temp, 'docs/DEMO_REMOVED.md'), 'utf8'), { code: 'ENOENT' });
 });
 
 test('CLI doctor passes before and after the supported clean-demo lifecycle', async () => {
