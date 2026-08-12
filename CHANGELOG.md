@@ -13,6 +13,8 @@ format and uses semantic versioning when versioned releases are published.
 
 ### Fixed
 
+- Report invalid manifest metadata as structured doctor issues and prevent
+  `clean-demo` from partially mutating projects when validation fails.
 - Let `nativepilot doctor` recognize the authoritative manifest state written by
   `clean-demo`, while continuing to report accidentally missing demo screens.
 - Keep generated Expo SDK 57 apps on its exact compatible Reanimated and
