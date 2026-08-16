@@ -26,7 +26,8 @@ nativepilot clean-demo ./MyAIAssistant
 ```
 
 Removes showcase chat UI and `src/demo`, writes `docs/DEMO_REMOVED.md` as an audit note, and records `demoState: "removed"` in `nativepilot.manifest.json`.
-The command validates the project and manifest before changing any file; validation
+The command validates the project and manifest, checks every output destination, and
+stages every planned write before changing managed files. Validation or staging
 failures exit nonzero and leave the project untouched.
 
 ## print-agent-brief

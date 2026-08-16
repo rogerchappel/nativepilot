@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
 import os from 'node:os';
 import path from 'node:path';
@@ -132,6 +132,22 @@ test('CLI clean-demo exits nonzero without mutation for invalid manifest shapes'
   assert.equal(await readFile(path.join(temp, 'nativepilot.manifest.json'), 'utf8'), '[]');
   assert.match(await readFile(path.join(temp, 'src/demo/demoContent.ts'), 'utf8'), /demoPrompts/);
   await assert.rejects(readFile(path.join(temp, 'docs/DEMO_REMOVED.md'), 'utf8'), { code: 'ENOENT' });
+});
+
+test('CLI clean-demo exits nonzero without mutation when an output path cannot be replaced', async () => {
+  const temp = await mkdtemp(path.join(os.tmpdir(), 'nativepilot-clean-output-'));
+  await createProject('OutputFailureApp', { dir: temp });
+  const tracked = ['app/chat.tsx', 'src/demo/demoContent.ts', 'app/index.tsx', 'nativepilot.manifest.json'];
+  const before = new Map(await Promise.all(tracked.map(async (file) => [file, await readFile(path.join(temp, file), 'utf8')] as const)));
+  await mkdir(path.join(temp, 'docs/DEMO_REMOVED.md'));
+  const cli = path.resolve('dist/src/index.js');
+
+  const result = spawnSync(process.execPath, [cli, 'clean-demo', temp], { encoding: 'utf8' });
+
+  assert.equal(result.status, 1, result.stderr || result.stdout);
+  assert.match(result.stderr, /cannot replace non-file project path: docs\/DEMO_REMOVED\.md/);
+  for (const file of tracked) assert.equal(await readFile(path.join(temp, file), 'utf8'), before.get(file));
+  assert.equal((await stat(path.join(temp, 'docs/DEMO_REMOVED.md'))).isDirectory(), true);
 });
 
 test('CLI doctor passes before and after the supported clean-demo lifecycle', async () => {
