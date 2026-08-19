@@ -7,6 +7,9 @@ nativepilot create MyAIAssistant --preset expo --providers openai,anthropic,gemi
 ```
 
 Writes a deterministic Expo app. Refuses non-empty directories unless `--force` is supplied.
+Before writing, the command generates the complete scaffold and preflights every
+destination. Generation or destination-validation failures leave the target unchanged;
+on success, `--force` overwrites nativepilot-managed files and preserves other files.
 
 ## doctor
 
