@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdir, mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
 import os from 'node:os';
 import path from 'node:path';
@@ -41,6 +41,32 @@ test('create accepts an explicit filesystem path as target', async () => {
   assert.equal(result.root, target);
   const pkg = JSON.parse(await readFile(path.join(target, 'package.json'), 'utf8'));
   assert.equal(pkg.name, 'pathsmoke');
+});
+
+test('create preflights every output before changing a force target', async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'nativepilot-atomic-'));
+  await writeFile(path.join(root, 'package.json'), 'USER PACKAGE SENTINEL\n');
+  await mkdir(path.join(root, 'app'));
+  await mkdir(path.join(root, 'app', 'chat.tsx'));
+
+  await assert.rejects(createProject('AtomicApp', { dir: root, force: true }),
+    /cannot replace non-file project path: app\/chat\.tsx/);
+
+  assert.equal(await readFile(path.join(root, 'package.json'), 'utf8'), 'USER PACKAGE SENTINEL\n');
+  assert.deepEqual(await readdir(root), ['app', 'package.json']);
+  assert.deepEqual(await readdir(path.join(root, 'app')), ['chat.tsx']);
+  assert.equal((await stat(path.join(root, 'app', 'chat.tsx'))).isDirectory(), true);
+});
+
+test('create force overwrites nativepilot-managed files after successful preflight', async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'nativepilot-force-'));
+  await writeFile(path.join(root, 'package.json'), 'USER PACKAGE SENTINEL\n');
+  await writeFile(path.join(root, 'keep.txt'), 'keep me\n');
+
+  await createProject('ForceApp', { dir: root, force: true });
+
+  assert.equal(JSON.parse(await readFile(path.join(root, 'package.json'), 'utf8')).name, 'forceapp');
+  assert.equal(await readFile(path.join(root, 'keep.txt'), 'utf8'), 'keep me\n');
 });
 
 test('doctor passes a fresh generated app', async () => {
