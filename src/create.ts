@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { assertWritableNewProject, writeProjectFile } from './fsx.js';
+import { assertProjectDestinationsWritable, assertWritableNewProject, writeProjectFile } from './fsx.js';
 import { createFiles, normalizeAppName, parseProviders, projectDirFrom } from './templates.js';
 import type { CreateOptions } from './types.js';
 
@@ -11,8 +11,9 @@ export async function createProject(appName: string, raw: RawCreateOptions = {})
   const root = raw.dir ? path.resolve(raw.dir) : looksLikePath ? path.resolve(appName) : projectDirFrom(process.cwd(), normalizeAppName(appName));
   const name = normalizeAppName(looksLikePath ? path.basename(root) : appName);
   const options: CreateOptions = { dir: root, name, preset: 'expo', providers: parseProviders(raw.providers), force: Boolean(raw.force) };
-  await assertWritableNewProject(root, options.force);
   const files = createFiles(options);
+  await assertWritableNewProject(root, options.force);
+  await assertProjectDestinationsWritable(root, files.map((item) => item.path));
   for (const item of files) await writeProjectFile(root, item.path, item.content, item.executable);
   return { root, files: files.map((item) => item.path).sort() };
 }
