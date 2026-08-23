@@ -57,3 +57,14 @@ test('pins the Expo SDK 57 animation runtime to compatible versions', () => {
     'react-native-worklets': '0.10.1'
   });
 });
+
+test('installs the CLI used by generated verification scripts', () => {
+  const files = new Map(createFiles({ dir: '.', name: 'Verified App', preset: 'expo', providers: ['local'], force: false })
+    .map((file) => [file.path, file.content]));
+  const pkg = JSON.parse(files.get('package.json') ?? '{}');
+
+  assert.equal(pkg.devDependencies.nativepilot, '^0.1.0');
+  assert.equal(pkg.scripts['nativepilot:doctor'], 'nativepilot doctor .');
+  assert.match(files.get('README.md') ?? '', /npm install[\s\S]*npm run nativepilot:doctor/);
+  assert.doesNotMatch(files.get('README.md') ?? '', /`nativepilot doctor \.`/);
+});
