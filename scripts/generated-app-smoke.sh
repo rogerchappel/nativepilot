@@ -19,6 +19,7 @@ node "$repo_root/dist/src/index.js" create GeneratedSmoke --dir "$app_root" --pr
   npm install --save-dev "$smoke_root/$package_tarball" --package-lock-only --ignore-scripts --no-audit --no-fund
   npm ci --ignore-scripts --no-audit --no-fund
   npm ls react-native react-native-reanimated react-native-worklets --depth=0
+  bash "$repo_root/scripts/expo-dependency-check.sh"
   npm test
   npm run typecheck
   npm run doctor
