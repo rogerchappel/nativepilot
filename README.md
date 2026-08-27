@@ -45,7 +45,8 @@ bash demo/run-generator-tour.sh
 
 The interactive demo installs nothing inside the generated app and removes its temporary
 files on exit. The release check separately installs a disposable generated app
-from a fresh lockfile, runs Expo Doctor, and typechecks it. See [the generator demo walkthrough](docs/GENERATOR_DEMO.md) for
+from a fresh lockfile, requires Expo's dependency-version check and Expo Doctor
+to pass, and typechecks it. See [the generator demo walkthrough](docs/GENERATOR_DEMO.md) for
 the exact claims it verifies and what remains outside its scope.
 
 ## Generated app personality
