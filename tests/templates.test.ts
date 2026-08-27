@@ -52,7 +52,7 @@ test('pins the Expo SDK 57 animation runtime to compatible versions', () => {
     'react-native-reanimated': pkg.dependencies['react-native-reanimated'],
     'react-native-worklets': pkg.dependencies['react-native-worklets']
   }, {
-    'react-native': '0.86.2',
+    'react-native': '0.86.3',
     'react-native-reanimated': '4.5.1',
     'react-native-worklets': '0.10.1'
   });
