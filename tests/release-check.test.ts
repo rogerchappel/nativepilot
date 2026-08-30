@@ -20,3 +20,22 @@ test('fails generated-app verification on Expo dependency mismatches', () => {
     rmSync(binDir, { recursive: true, force: true });
   }
 });
+
+test('release contract rejects missing publish and repacked artifacts', () => {
+  const fixtureDir = mkdtempSync(join(tmpdir(), 'nativepilot-release-contract-'));
+  try {
+    const fixture = join(fixtureDir, 'release.yml');
+    writeFileSync(fixture, 'run: npm pack\nrun: gh release create v1 *.tgz\n');
+
+    const result = spawnSync(process.execPath, [
+      join(process.cwd(), 'scripts/release-contract-check.mjs'),
+      fixture
+    ], { encoding: 'utf8' });
+
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /publishes the captured tarball/);
+    assert.match(result.stderr, /attaches the captured tarball/);
+  } finally {
+    rmSync(fixtureDir, { recursive: true, force: true });
+  }
+});

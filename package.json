@@ -11,7 +11,7 @@
     ".": "./dist/src/index.js"
   },
   "files": [
-    "dist",
+    "dist/src",
     "docs",
     "README.md",
     "LICENSE",
@@ -26,7 +26,8 @@
     "smoke": "npm run build && bash scripts/smoke.sh",
     "package:smoke": "npm run build && bash scripts/package-smoke.sh",
     "generated:smoke": "npm run build && bash scripts/generated-app-smoke.sh",
-    "release:check": "npm run check && npm test && npm run smoke && npm run package:smoke && npm run generated:smoke"
+    "release:contract": "node scripts/release-contract-check.mjs",
+    "release:check": "npm run check && npm test && npm run smoke && npm run package:smoke && npm run generated:smoke && npm run release:contract"
   },
   "keywords": [
     "expo",
