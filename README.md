@@ -4,16 +4,9 @@ NativePilot is an AI-native Expo React Native starter generator. It creates a mo
 
 It is not another static boilerplate. It is a launch lane for teams who want to prototype AI mobile experiences without letting keys, architecture, or agent instructions become folklore.
 
-## Install / run locally
+## Install and run
 
-```bash
-npm install
-npm run build
-node dist/src/index.js create MyAIAssistant
-node dist/src/index.js doctor ./MyAIAssistant --fail-on unsafe-key,stale-guidance
-```
-
-When published, the intended usage is:
+Run the published CLI directly from npm:
 
 ```bash
 npx nativepilot create MyAIAssistant --preset expo --providers openai,anthropic,gemini,local
@@ -23,6 +16,19 @@ npm run typecheck
 npm run doctor
 npm run start
 ```
+
+To work from a source checkout instead:
+
+```bash
+npm install
+npm run build
+node dist/src/index.js create MyAIAssistant
+node dist/src/index.js doctor ./MyAIAssistant --fail-on unsafe-key,stale-guidance
+```
+
+Version tags run the release checks, capture one package tarball, smoke-test it,
+publish that exact artifact to npm with provenance, and attach it to the matching
+GitHub release.
 
 ## Commands
 
