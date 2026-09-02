@@ -6,7 +6,7 @@ It is not another static boilerplate. It is a launch lane for teams who want to 
 
 ## Install and run
 
-Run the published CLI directly from npm:
+Once nativepilot is published to npm, the registry path will be:
 
 ```bash
 npx nativepilot create MyAIAssistant --preset expo --providers openai,anthropic,gemini,local
@@ -17,14 +17,23 @@ npm run doctor
 npm run start
 ```
 
-To work from a source checkout instead:
+To work from a source checkout today, pack the local CLI and install that exact
+artifact in the generated app:
 
 ```bash
 npm install
 npm run build
+npm pack --silent
 node dist/src/index.js create MyAIAssistant
-node dist/src/index.js doctor ./MyAIAssistant --fail-on unsafe-key,stale-guidance
+cd MyAIAssistant
+npm install --save-dev ../nativepilot-0.1.0.tgz
+npm run typecheck
+npm run doctor
+npm run nativepilot:doctor
 ```
+
+The generator retains `nativepilot: ^0.1.0` as the eventual registry dependency;
+installing the tarball replaces it only in this disposable source-checkout app.
 
 Version tags run the release checks, capture one package tarball, smoke-test it,
 publish that exact artifact to npm with provenance, and attach it to the matching
