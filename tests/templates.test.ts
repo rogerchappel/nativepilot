@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { createFiles, moduleNameFor, normalizeAppName, packageNameFor, parseProviders } from '../src/templates.js';
 
 test('normalizes app names for directories modules and packages', () => {
@@ -67,4 +68,12 @@ test('installs the CLI used by generated verification scripts', () => {
   assert.equal(pkg.scripts['nativepilot:doctor'], 'nativepilot doctor .');
   assert.match(files.get('README.md') ?? '', /npm install[\s\S]*npm run nativepilot:doctor/);
   assert.doesNotMatch(files.get('README.md') ?? '', /`nativepilot doctor \.`/);
+});
+
+test('documents registry and source-checkout installation as separate paths', () => {
+  const readme = readFileSync('README.md', 'utf8');
+
+  assert.match(readme, /Once nativepilot is published to npm, the registry path will be:[\s\S]*npx nativepilot create/);
+  assert.match(readme, /To work from a source checkout today[\s\S]*npm pack --silent[\s\S]*npm install --save-dev \.\.\/nativepilot-0\.1\.0\.tgz[\s\S]*npm run typecheck[\s\S]*npm run doctor[\s\S]*npm run nativepilot:doctor/);
+  assert.doesNotMatch(readme, /Run the published CLI directly from npm/);
 });
