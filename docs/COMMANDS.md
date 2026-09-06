@@ -21,6 +21,9 @@ Checks required files, generated manifest metadata, npm scripts, alias consisten
 
 Malformed, unreadable, or structurally invalid manifest metadata is reported as an
 `invalid-manifest` issue associated with `nativepilot.manifest.json`.
+Malformed or unreadable package metadata is reported as an `invalid-package`
+issue associated with `package.json`; doctor continues running its independent
+project checks and returns the usual structured result.
 
 ## clean-demo
 
