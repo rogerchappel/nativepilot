@@ -13,6 +13,8 @@ format and uses semantic versioning when versioned releases are published.
 
 ### Fixed
 
+- Keep `doctor` diagnostics structured and complete when `package.json` is
+  malformed or unreadable.
 - Report invalid manifest metadata as structured doctor issues and prevent
   `clean-demo` from partially mutating projects when validation fails.
 - Let `nativepilot doctor` recognize the authoritative manifest state written by
