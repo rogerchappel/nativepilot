@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { readdir } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
 import { pathExists, readTextIfExists } from './fsx.js';
 import { manifestShapeErrors, readManifest, type NativePilotManifest } from './manifest.js';
 import type { DoctorIssue, DoctorResult } from './types.js';
@@ -56,9 +56,22 @@ async function inspectManifest(root: string, issues: DoctorIssue[]): Promise<Nat
 }
 
 async function checkPackageScripts(root: string, issues: DoctorIssue[]): Promise<void> {
-  const text = await readTextIfExists(path.join(root, 'package.json'));
-  if (!text) return;
-  const pkg = JSON.parse(text) as { scripts?: Record<string, string> };
+  const file = path.join(root, 'package.json');
+  if (!(await pathExists(file))) return;
+  let text: string;
+  try {
+    text = await readFile(file, 'utf8');
+  } catch {
+    issues.push(error('invalid-package', 'Unable to read package.json.', 'package.json'));
+    return;
+  }
+  let pkg: { scripts?: Record<string, string> };
+  try {
+    pkg = JSON.parse(text) as { scripts?: Record<string, string> };
+  } catch {
+    issues.push(error('invalid-package', 'Malformed JSON in package.json.', 'package.json'));
+    return;
+  }
   for (const script of ['test', 'nativepilot:doctor', 'nativepilot:brief']) {
     if (!pkg.scripts?.[script]) issues.push(warn('missing-script', `package.json is missing script: ${script}`, 'package.json'));
   }
