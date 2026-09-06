@@ -117,6 +117,50 @@ test('doctor reports an unreadable manifest path as a file-specific issue', asyn
     && /Unable to read/.test(issue.message)), JSON.stringify(result.issues));
 });
 
+test('doctor reports malformed package metadata and continues independent checks', async () => {
+  const temp = await mkdtemp(path.join(os.tmpdir(), 'nativepilot-package-malformed-'));
+  await createProject('MalformedPackageApp', { dir: temp });
+  await writeFile(path.join(temp, 'package.json'), '{broken');
+  await rm(path.join(temp, 'AGENTS.md'));
+
+  const result = await doctor(temp);
+
+  assert.equal(result.ok, false);
+  assert.equal(result.issueCount, result.issues.length);
+  assert.ok(result.issues.some((issue) => issue.code === 'invalid-package'
+    && issue.severity === 'error'
+    && issue.file === 'package.json'
+    && issue.message === 'Malformed JSON in package.json.'), JSON.stringify(result.issues));
+  assert.ok(result.issues.some((issue) => issue.code === 'missing-file'
+    && issue.file === 'AGENTS.md'), JSON.stringify(result.issues));
+  assert.ok(result.issues.some((issue) => issue.code === 'missing-guidance'
+    && issue.file === 'AGENTS.md'), JSON.stringify(result.issues));
+});
+
+test('CLI doctor returns a structured result for an unreadable package path', async () => {
+  const temp = await mkdtemp(path.join(os.tmpdir(), 'nativepilot-package-unreadable-'));
+  await createProject('UnreadablePackageApp', { dir: temp });
+  await rm(path.join(temp, 'package.json'));
+  await mkdir(path.join(temp, 'package.json'));
+  await rm(path.join(temp, 'CLAUDE.md'));
+  const cli = path.resolve('dist/src/index.js');
+
+  const result = spawnSync(process.execPath, [cli, 'doctor', temp], { encoding: 'utf8' });
+
+  assert.equal(result.status, 1, result.stderr || result.stdout);
+  assert.equal(result.stderr, '');
+  const output = JSON.parse(result.stdout);
+  assert.deepEqual(Object.keys(output), ['ok', 'root', 'issueCount', 'issues']);
+  assert.equal(output.ok, false);
+  assert.equal(output.root, temp);
+  assert.equal(output.issueCount, output.issues.length);
+  assert.ok(output.issues.some((issue: { code: string; file?: string; message: string }) => issue.code === 'invalid-package'
+    && issue.file === 'package.json'
+    && issue.message === 'Unable to read package.json.'));
+  assert.ok(output.issues.some((issue: { code: string; file?: string }) => issue.code === 'missing-guidance'
+    && issue.file === 'CLAUDE.md'));
+});
+
 test('clean-demo removes showcase while preserving AI wiring', async () => {
   const temp = await mkdtemp(path.join(os.tmpdir(), 'nativepilot-clean-'));
   await createProject('CleanApp', { dir: temp });
